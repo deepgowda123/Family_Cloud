@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-6">
+    <h4>Add Person</h4>
+    <form method="post" action="{{ url_for('add_person') }}">
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input class="form-control" name="name" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Generation (1 = earliest)</label>
+        <input class="form-control" name="generation" value="1" type="number" min="1">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Parent (optional)</label>
+        <select name="parent_id" class="form-select">
+          <option value="">-- none --</option>
+          {% for p in persons %}
+            <option value="{{ p.id }}">{{ p.name }} (gen {{ p.generation }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="btn btn-primary">Add</button>
+    </form>
+  </div>
+
+  <div class="col-md-6">
+    <h4>All People</h4>
+    <table class="table table-sm">
+      <thead><tr><th>Name</th><th>Gen</th><th>Parent</th><th></th></tr></thead>
+      <tbody>
+        {% for p in persons %}
+        <tr>
+          <td>{{ p.name }}</td>
+          <td>{{ p.generation }}</td>
+          <td>{{ p.parent.name if p.parent else '-' }}</td>
+          <td>
+            <form method="post" action="{{ url_for('delete_person', person_id=p.id) }}" style="display:inline;">
+              <button class="btn btn-danger btn-sm" onclick="return confirm('Delete {{ p.name }}?')">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

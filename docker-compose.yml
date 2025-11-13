@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: ancestor_web
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:15
+    container_name: ancestor_db
+    restart: always
+    environment:
+      POSTGRES_USER: ancestor_user
+      POSTGRES_PASSWORD: ancestor_pass
+      POSTGRES_DB: ancestor_tree
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:
+

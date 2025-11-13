@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Ancestor Tree</h2>
+
+<div id="tree-container"></div>
+
+<script>
+  // Pass data from Flask to JS
+  const people = {{ people | tojson }};
+  
+  // Helper: group people by parent_id
+  const peopleByParent = {};
+  people.forEach(p => {
+    const pid = p.parent_id || 0;
+    if (!peopleByParent[pid]) peopleByParent[pid] = [];
+    peopleByParent[pid].push(p);
+  });
+
+  // Recursive function to build the tree
+  function buildTree(parentId = 0) {
+    const children = peopleByParent[parentId] || [];
+    if (children.length === 0) return "";
+    
+    let html = "<ul>";
+    children.forEach(child => {
+      html += `<li>${child.name}`;
+      html += buildTree(child.id);
+      html += "</li>";
+    });
+    html += "</ul>";
+    return html;
+  }
+
+  // Render the tree into the container
+  document.getElementById("tree-container").innerHTML = buildTree(0);
+</script>
+
+<style>
+  ul {
+    list-style-type: none;
+    padding-left: 20px;
+    position: relative;
+  }
+
+  li {
+    margin: 6px 0;
+    padding: 4px 8px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  li::before {
+    content: "";
+    position: absolute;
+    border-left: 2px solid #999;
+    height: 100%;
+    left: -10px;
+    top: 0;
+  }
+
+  li:first-child::before {
+    display: none;
+  }
+</style>
+{% endblock %}
