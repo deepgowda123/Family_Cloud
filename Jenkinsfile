@@ -12,7 +12,6 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 bat '''
-                cd E:\\ancestor-tree
                 C:\\Users\\HP\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m pip install -r requirements.txt
                 '''
             }
