@@ -7,7 +7,7 @@ pipeline {
     }
 
     tools {
-        sonarScanner 'SonarScanner'
+        hudson.plugins.sonar.SonarRunnerInstallation 'SonarScanner'
     }
 
     stages {
