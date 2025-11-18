@@ -4,10 +4,7 @@ pipeline {
     environment {
         PYTHON = "C:\\Users\\HP\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
         EMAIL_TO = "deepikagowda255@gmail.com"
-    }
-
-    tools {
-        hudson.plugins.sonar.SonarRunnerInstallation 'SonarScanner'
+        SONAR_SCANNER = tool 'SonarScanner'
     }
 
     stages {
@@ -65,7 +62,7 @@ pipeline {
                 withSonarQubeEnv('SonarQube') {
                     bat """
                     cd E:\\ancestor-tree
-                    ${tool 'SonarScanner'}\\bin\\sonar-scanner.bat ^
+                    %SONAR_SCANNER%\\bin\\sonar-scanner.bat ^
                         -Dsonar.projectKey=FamilyCloud ^
                         -Dsonar.sources=. ^
                         -Dsonar.host.url=http://localhost:9000 ^
