@@ -47,8 +47,8 @@ pipeline {
             steps {
                 bat '''
                 cd E:\\ancestor-tree
-                venv\\Scripts\\activate && pip install pytest
-                venv\\Scripts\\activate && pytest
+                venv\\Scripts\\activate && pip install pytest pytest-cov
+                venv\\Scripts\\activate && pytest --cov=. --cov-report xml
                 '''
             }
         }
