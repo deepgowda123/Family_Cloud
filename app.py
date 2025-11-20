@@ -1,35 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
 from models import db, Person
-from forms import PersonForm
 import os
 
 
 def create_app():
     app = Flask(__name__)
 
-    # 🔧 Load config      
+    # Load config
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
         'DATABASE_URL', 'sqlite:///ancestor_tree.db'
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'devsecret')
 
-    # ✅ Bind SQLAlchemy to the app
     db.init_app(app)
 
-    # ✅ Create tables before first request
     @app.before_request
     def create_tables():
         db.create_all()
 
-    # 🏠 Home route
     @app.route('/')
     def index():
         persons = Person.query.all()
         return render_template('index.html', persons=persons)
 
-    # ➕ Add new person
     @app.route('/add', methods=['POST'])
     def add_person():
         name = request.form.get('name')
@@ -46,8 +40,7 @@ def create_app():
         db.session.commit()
 
         return redirect(url_for('index'))
-    
-    # ➖ Delete a person
+
     @app.route('/delete/<int:person_id>', methods=['POST'])
     def delete_person(person_id):
         person = db.session.get(Person, person_id)
@@ -56,8 +49,7 @@ def create_app():
             db.session.commit()
         return redirect(url_for('index'))
 
-    # 🌳 Tree view route
-    @app.route("/tree")
+    @app.route('/tree')
     def tree_view():
         people = Person.query.all()
         data = [p.to_dict() for p in people]

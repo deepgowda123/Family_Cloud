@@ -1,9 +1,10 @@
-# forms.py
-from dataclasses import dataclass
-from typing import Optional
+from flask_wtf import FlaskForm
+from wtforms import StringField, IntegerField, SubmitField
+from wtforms.validators import DataRequired
 
-@dataclass
-class PersonForm:
-    name: str
-    generation: int
-    parent_id: Optional[int]
+
+class PersonForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    parent_id = IntegerField('Parent ID')
+    generation = IntegerField('Generation', default=1)
+    submit = SubmitField('Add Person')
