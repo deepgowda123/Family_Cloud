@@ -22,9 +22,8 @@ def create_app():
     secret_key = os.getenv("SECRET_KEY", "test-secret-key")
     app.config["SECRET_KEY"] = secret_key
 
-    # Disable CSRF during tests (important for pytest)
-    if app.config.get("TESTING"):
-        app.config["WTF_CSRF_ENABLED"] = False
+    # Disable CSRF for pytest
+    app.config["WTF_CSRF_ENABLED"] = False
 
     # ---------------------------------------------------------------------
     # Init Extensions
@@ -38,6 +37,7 @@ def create_app():
     # ---------------------------------------------------------------------
     # Routes
     # ---------------------------------------------------------------------
+
     @app.route('/')
     def index():
         persons = Person.query.all()
@@ -49,7 +49,6 @@ def create_app():
         parent_id = request.form.get('parent_id') or None
         generation = int(request.form.get('generation', 1))
 
-        # Auto-increment generation if parent exists
         if parent_id:
             parent = db.session.get(Person, parent_id)
             if parent:
