@@ -49,12 +49,16 @@ pipeline {
             steps {
                 bat """
                 call venv\\Scripts\\activate
-                pip install pytest pytest-cov
 
-                rem *** FIX: allow Python to find app/models/tests ***
-                set PYTHONPATH=%CD%
+		rem *** INSTALL ALL DEPENDENCIES ***
+        	pip install -r requirements.txt
 
-                pytest --cov=. --cov-branch --cov-report xml
+        	rem *** FIX: allow Python to find app/modules/tests ***
+        	set PYTHONPATH=%CD%
+
+        	rem *** RUN TESTS ***
+        	pytest --cov=. --cov-branch --cov-report=xml
+
                 """
             }
         }
