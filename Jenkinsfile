@@ -30,7 +30,15 @@ pipeline {
                 bat """
                 call venv\\Scripts\\activate
                 pip install --upgrade pip
+
+                rem Install app dependencies
                 pip install -r requirements.txt
+
+                rem Install Flask extensions your app needs
+                pip install flask-wtf flask_sqlalchemy sqlalchemy wtforms
+
+                rem Install lint & test tools
+                pip install flake8 pytest pytest-cov
                 """
             }
         }
@@ -39,7 +47,6 @@ pipeline {
             steps {
                 bat """
                 call venv\\Scripts\\activate
-                pip install flake8
                 flake8 .
                 """
             }
@@ -50,15 +57,11 @@ pipeline {
                 bat """
                 call venv\\Scripts\\activate
 
-		rem *** INSTALL ALL DEPENDENCIES ***
-        	pip install -r requirements.txt
+                rem Ensures Python can find app, models, tests
+                set PYTHONPATH=%CD%
 
-        	rem *** FIX: allow Python to find app/modules/tests ***
-        	set PYTHONPATH=%CD%
-
-        	rem *** RUN TESTS ***
-        	pytest --cov=. --cov-branch --cov-report=xml
-
+                rem Run tests with coverage
+                pytest --cov=. --cov-branch --cov-report=xml:coverage.xml
                 """
             }
         }
@@ -95,7 +98,7 @@ pipeline {
             emailext(
                 to: "${EMAIL_TO}",
                 subject: "Jenkins Build SUCCESS: FamilyCloud",
-                body: "Your Jenkins pipeline completed successfully!"
+                body: "Your Jenkins pipeline completed successfully! 🎉"
             )
         }
 
@@ -103,7 +106,7 @@ pipeline {
             emailext(
                 to: "${EMAIL_TO}",
                 subject: "Jenkins Build FAILED: FamilyCloud",
-                body: "Your Jenkins pipeline failed. Check Jenkins logs."
+                body: "Your Jenkins pipeline failed. Please check the Jenkins logs. ❌"
             )
         }
     }

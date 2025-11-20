@@ -13,14 +13,14 @@ def create_app():
     # Configuration
     # ---------------------------------------------------------------------
 
-    # Database
+    # Database URL
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
         'DATABASE_URL',
-        'sqlite:///ancestor_tree.db'  # safe fallback
+        'sqlite:///ancestor_tree.db'  # fallback for local/dev/tests
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # SECRET_KEY - must be set as an environment variable
+    # SECRET_KEY (pytest or dev will use fallback)
     secret_key = os.getenv("SECRET_KEY")
     if not secret_key:
         secret_key = "test-secret-key"
@@ -32,7 +32,7 @@ def create_app():
     csrf.init_app(app)
     db.init_app(app)
 
-    # Create tables once at startup, not on every request
+    # Create tables only once, not for every request
     with app.app_context():
         db.create_all()
 
@@ -51,7 +51,7 @@ def create_app():
         parent_id = request.form.get('parent_id') or None
         generation = int(request.form.get('generation', 1))
 
-        # If parent exists → auto increment generation
+        # Auto-calc generation from parent
         if parent_id:
             parent = db.session.get(Person, parent_id)
             if parent:
@@ -85,7 +85,7 @@ def create_app():
 
 
 # -------------------------------------------------------------------------
-# Run locally (not used in Docker/Jenkins)
+# Run locally (not used by Jenkins or Docker)
 # -------------------------------------------------------------------------
 if __name__ == '__main__':
     app = create_app()
