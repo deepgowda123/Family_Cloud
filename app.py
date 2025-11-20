@@ -8,7 +8,7 @@ import os
 def create_app():
     app = Flask(__name__)
 
-    # 🔧 Load config
+    # 🔧 Load config      
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
         'DATABASE_URL', 'sqlite:///ancestor_tree.db'
     )
@@ -37,7 +37,7 @@ def create_app():
         generation = int(request.form.get('generation', 1))
 
         if parent_id:
-            parent = Person.query.get(parent_id)
+            parent = db.session.get(Person, parent_id)
             if parent:
                 generation = parent.generation + 1
 
@@ -47,15 +47,14 @@ def create_app():
 
         return redirect(url_for('index'))
     
-    
+    # ➖ Delete a person
     @app.route('/delete/<int:person_id>', methods=['POST'])
     def delete_person(person_id):
-        person = Person.query.get(person_id)
+        person = db.session.get(Person, person_id)
         if person:
             db.session.delete(person)
             db.session.commit()
         return redirect(url_for('index'))
-
 
     # 🌳 Tree view route
     @app.route("/tree")

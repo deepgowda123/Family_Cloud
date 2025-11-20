@@ -17,55 +17,57 @@ pipeline {
 
         stage('Setup Virtual Environment') {
             steps {
-                bat '''
-                cd E:\\ancestor-tree
-                %PYTHON% -m venv venv
-                '''
+                bat """
+                if not exist venv (
+                    %PYTHON% -m venv venv
+                )
+                """
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                bat '''
-                cd E:\\ancestor-tree
-                venv\\Scripts\\activate && pip install -r requirements.txt
-                '''
+                bat """
+                call venv\\Scripts\\activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+                """
             }
         }
 
         stage('Lint') {
             steps {
-                bat '''
-                cd E:\\ancestor-tree
-                venv\\Scripts\\activate && pip install flake8
-                venv\\Scripts\\activate && flake8 .
-                '''
+                bat """
+                call venv\\Scripts\\activate
+                pip install flake8
+                flake8 .
+                """
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat '''
-                cd E:\\ancestor-tree
-                venv\\Scripts\\activate && pip install pytest pytest-cov
-                venv\\Scripts\\activate && pytest --cov=. --cov-report xml
-                '''
+                bat """
+                call venv\\Scripts\\activate
+                pip install pytest pytest-cov
+                pytest --cov=. --cov-branch --cov-report xml
+                """
             }
         }
 
         stage('SonarQube Analysis') {
             environment {
-                SONAR_TOKEN = credentials('sonar-token')
+                SONAR_TOKEN = credentials('sonar-token') // Make sure Jenkins has this credential
             }
             steps {
                 withSonarQubeEnv('SonarQube') {
                     bat """
-                    cd E:\\ancestor-tree
-                    %SONAR_SCANNER%\\bin\\sonar-scanner.bat ^
+                    call %SONAR_SCANNER%\\bin\\sonar-scanner.bat ^
                         -Dsonar.projectKey=FamilyCloud ^
                         -Dsonar.sources=. ^
                         -Dsonar.host.url=http://localhost:9000 ^
-                        -Dsonar.login=%SONAR_TOKEN%
+                        -Dsonar.login=%SONAR_TOKEN% ^
+                        -Dsonar.python.coverage.reportPaths=coverage.xml
                     """
                 }
             }
@@ -73,10 +75,9 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat '''
-                cd E:\\ancestor-tree
+                bat """
                 docker build -t deepika/familycloud:latest .
-                '''
+                """
             }
         }
     }
