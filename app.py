@@ -9,32 +9,29 @@ csrf = CSRFProtect()
 def create_app():
     app = Flask(__name__)
 
-    # ---------------------------------------------------------------------
     # Configuration
-    # ---------------------------------------------------------------------
-
-    # Database URL
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
         'DATABASE_URL',
-        'sqlite:///ancestor_tree.db'  # fallback for local/dev/tests
+        'sqlite:///ancestor_tree.db'
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # SECRET_KEY (pytest or dev will use fallback)
-    secret_key = os.getenv("SECRET_KEY")
-    if not secret_key:
-        secret_key = "test-secret-key"
+    secret_key = os.getenv("SECRET_KEY", "test-secret-key")
     app.config["SECRET_KEY"] = secret_key
 
-    # ---------------------------------------------------------------------
-    # Init Extensions
-    # ---------------------------------------------------------------------
+    # Disable CSRF protection during tests
+    if app.config.get("TESTING"):
+        app.config["WTF_CSRF_ENABLED"] = False
+
+    # Init extensions
     csrf.init_app(app)
     db.init_app(app)
 
-    # Create tables only once, not for every request
     with app.app_context():
         db.create_all()
+
+    # routes...
+
 
     # ---------------------------------------------------------------------
     # Routes
