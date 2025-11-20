@@ -50,6 +50,10 @@ pipeline {
                 bat """
                 call venv\\Scripts\\activate
                 pip install pytest pytest-cov
+
+                rem *** FIX: allow Python to find app/models/tests ***
+                set PYTHONPATH=%CD%
+
                 pytest --cov=. --cov-branch --cov-report xml
                 """
             }
@@ -57,7 +61,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             environment {
-                SONAR_TOKEN = credentials('sonar-token') // Make sure Jenkins has this credential
+                SONAR_TOKEN = credentials('sonar-token')
             }
             steps {
                 withSonarQubeEnv('SonarQube') {
