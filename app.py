@@ -9,34 +9,35 @@ csrf = CSRFProtect()
 def create_app():
     app = Flask(__name__)
 
+    # ---------------------------------------------------------------------
     # Configuration
+    # ---------------------------------------------------------------------
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
         'DATABASE_URL',
         'sqlite:///ancestor_tree.db'
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    # Secret Key
     secret_key = os.getenv("SECRET_KEY", "test-secret-key")
     app.config["SECRET_KEY"] = secret_key
 
-    # Disable CSRF protection during tests
+    # Disable CSRF during tests (important for pytest)
     if app.config.get("TESTING"):
         app.config["WTF_CSRF_ENABLED"] = False
 
-    # Init extensions
+    # ---------------------------------------------------------------------
+    # Init Extensions
+    # ---------------------------------------------------------------------
     csrf.init_app(app)
     db.init_app(app)
 
     with app.app_context():
         db.create_all()
 
-    # routes...
-
-
     # ---------------------------------------------------------------------
     # Routes
     # ---------------------------------------------------------------------
-
     @app.route('/')
     def index():
         persons = Person.query.all()
@@ -48,7 +49,7 @@ def create_app():
         parent_id = request.form.get('parent_id') or None
         generation = int(request.form.get('generation', 1))
 
-        # Auto-calc generation from parent
+        # Auto-increment generation if parent exists
         if parent_id:
             parent = db.session.get(Person, parent_id)
             if parent:
@@ -81,9 +82,6 @@ def create_app():
     return app
 
 
-# -------------------------------------------------------------------------
-# Run locally (not used by Jenkins or Docker)
-# -------------------------------------------------------------------------
 if __name__ == '__main__':
     app = create_app()
     app.run(host='0.0.0.0', port=5000)
